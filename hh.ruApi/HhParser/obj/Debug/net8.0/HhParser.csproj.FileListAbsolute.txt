@@ -1,0 +1,17 @@
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/HhParser
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/HhParser.deps.json
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/HhParser.runtimeconfig.json
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/HhParser.dll
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/HhParser.pdb
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.csproj.AssemblyReference.cache
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.GeneratedMSBuildEditorConfig.editorconfig
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.AssemblyInfoInputs.cache
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.AssemblyInfo.cs
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.csproj.CoreCompileInputs.cache
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.csproj.Up2Date
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.dll
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/refint/HhParser.dll
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.pdb
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/HhParser.genruntimeconfig.cache
+/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/obj/Debug/net8.0/ref/HhParser.dll
