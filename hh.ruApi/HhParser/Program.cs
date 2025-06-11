@@ -36,12 +36,12 @@ class Program
                     if (!resp.IsSuccessStatusCode)
                     {
                         string errorContent = await resp.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Ошибка HTTP {(int)resp.StatusCode}: {resp.ReasonPhrase}");
-                        Console.WriteLine($"Тело ответа: {errorContent}");
+                        Console.WriteLine($"HTTP ошибка {(int)resp.StatusCode}: {resp.ReasonPhrase}");
+                        Console.WriteLine($"Ответ: {errorContent}");
                         
                         if (resp.StatusCode == System.Net.HttpStatusCode.Forbidden)
                         {
-                            Console.WriteLine("Слишком много запросов, ждем 5 секунд...");
+                            Console.WriteLine("Слишком много запросов");
                             await Task.Delay(5000);
                         }
                         continue;
@@ -64,8 +64,6 @@ class Program
                     }
                 }
             }
-
-            Console.WriteLine("\n Частотность упоминания навыков:");
             foreach (var skill in skillFrequency.OrderByDescending(kv => kv.Value).Take(20))
             {
                 Console.WriteLine($"{skill.Key}: {skill.Value}");
