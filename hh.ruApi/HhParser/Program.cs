@@ -5,6 +5,14 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
+class CompetencyResult
+{
+    public string Name { get; set; }
+    public string Source { get; set; }
+    public string Description { get; set; }
+    public double FrequencyPercent { get; set; }
+}
+
 class Program
 {
     static readonly HttpClient client = new HttpClient();
@@ -18,6 +26,7 @@ class Program
         int pagesToFetch = 3;
 
         Dictionary<string, int> skillFrequency = new Dictionary<string, int>();
+        int totalVacancies = 0;
 
         try
         {
@@ -58,15 +67,32 @@ class Program
                             if (idToken != null)
                             {
                                 string vacancyId = idToken.ToString();
+                                totalVacancies++;
                                 await ParseVacancy(vacancyId, skillFrequency);
                             }
                         }
                     }
                 }
             }
+
+            var competencies = new List<CompetencyResult>();
             foreach (var skill in skillFrequency.OrderByDescending(kv => kv.Value).Take(20))
             {
-                Console.WriteLine($"{skill.Key}: {skill.Value}");
+                competencies.Add(new CompetencyResult
+                {
+                    Name = skill.Key,
+                    Source = "hh.ru",
+                    Description = "Описание отсутствует",
+                    FrequencyPercent = totalVacancies > 0 ? (skill.Value * 100.0 / totalVacancies) : 0
+                });
+            }
+
+            Console.WriteLine("\nТаблица компетенций:");
+            Console.WriteLine("{0,-25} | {1,-15} | {2,-30} | {3,10}", "Компетенция", "Источник", "Описание", "Частота (%)");
+            Console.WriteLine(new string('-', 90));
+            foreach (var comp in competencies)
+            {
+                Console.WriteLine("{0,-25} | {1,-15} | {2,-30} | {3,10:F2}", comp.Name, comp.Source, comp.Description, comp.FrequencyPercent);
             }
         }
         catch (HttpRequestException ex)

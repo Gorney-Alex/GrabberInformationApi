@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "jzcWWuxd09o=",
+  "dgSpecHash": "V4OObd2rJaY=",
   "success": true,
-  "projectFilePath": "/Users/home/Desktop/C#ScriptGrabberInformation/hh.ruApi/HhParser/HhParser.csproj",
+  "projectFilePath": "C:\\Users\\Home\\Desktop\\UniversityPractice\\GrabberInformationApi\\hh.ruApi\\HhParser\\HhParser.csproj",
   "expectedPackageFiles": [
-    "/Users/home/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\Home\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }

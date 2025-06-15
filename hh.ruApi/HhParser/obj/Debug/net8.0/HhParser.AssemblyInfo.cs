@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HhParser")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6c4170ae8c164f3711035e9e6bea31df8444548c")]
 [assembly: System.Reflection.AssemblyProductAttribute("HhParser")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HhParser")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
