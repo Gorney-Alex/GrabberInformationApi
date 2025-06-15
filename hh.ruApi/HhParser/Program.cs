@@ -5,14 +5,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
-class CompetencyResult
-{
-    public string Name { get; set; }
-    public string Source { get; set; }
-    public string Description { get; set; }
-    public double FrequencyPercent { get; set; }
-}
-
 class Program
 {
     static readonly HttpClient client = new HttpClient();
