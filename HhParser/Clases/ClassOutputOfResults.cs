@@ -1,4 +1,4 @@
-class CompetencyResult
+public class CompetencyResult
 {
     public string Name { get; set; }
     public string Source { get; set; }
