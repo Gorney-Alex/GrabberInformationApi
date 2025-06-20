@@ -1,53 +1,53 @@
 ﻿ДАННЫЕ ДЛЯ ОБЛАКА ТЕГОВ
-==============================
+=======================
 
-SQL:45
-Git:27
-PostgreSQL:21
-REST API:21
-Linux:16
-Python:14
-Docker:14
-JavaScript:13
-React:11
-CSS:11
-HTML:11
-Vue:8
-PHP:8
-MySQL:8
-Agile:8
-TypeScript:8
-Scrum:7
-Redis:7
-AI:6
-GitLab:6
-.NET:5
-Java:5
-CI/CD:5
-Rust:4
-GraphQL:4
-Django:3
-Spring:3
-Angular:3
-DevOps:3
-Express:3
-GitHub:3
-анализ:3
-проектирование:2
-Laravel:2
-Bootstrap:2
-Go:2
-Jenkins:2
-алгоритм:1
-система:1
-веб:1
-облачные технологии:1
-Microservices:1
-Kubernetes:1
-Flask:1
-MongoDB:1
-GitLab CI:1
-Node.js:1
-SASS:1
-LESS:1
-AWS:1
+SQL: 53
+Git: 27
+PostgreSQL: 21
+REST API: 19
+Docker: 18
+JavaScript: 16
+Python: 16
+Linux: 15
+PHP: 13
+HTML: 13
+CSS: 12
+Agile: 10
+React: 10
+Scrum: 9
+TypeScript: 9
+Redis: 8
+Vue: 7
+MySQL: 7
+GitLab: 7
+Django: 6
+Java: 5
+Go: 5
+CI/CD: 5
+.NET: 4
+AI: 4
+DevOps: 3
+Express: 3
+GitHub: 3
+MongoDB: 3
+Node.js: 3
+анализ: 2
+проектирование: 2
+Laravel: 2
+Angular: 2
+GraphQL: 2
+анализ: 1
+алгоритм: 1
+SQL: 1
+система: 1
+веб: 1
+облачные технологии: 1
+Microservices: 1
+Spring: 1
+Bootstrap: 1
+Rust: 1
+GitLab CI: 1
+SASS: 1
+LESS: 1
+AWS: 1
+Azure: 1

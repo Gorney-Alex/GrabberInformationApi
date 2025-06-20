@@ -4,9 +4,6 @@ using System.Text;
 
 namespace CompetencyParser.Parsers
 {
-    /// <summary>
-    /// Парсер для профессиональных стандартов
-    /// </summary>
     public class ProfessionalStandardParser : IParser<ProfessionalStandardData>
     {
         private readonly HttpClient _httpClient;
@@ -18,26 +15,21 @@ namespace CompetencyParser.Parsers
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
         }
 
-        /// <summary>
-        /// Парсинг профессиональных стандартов
-        /// </summary>
         public async Task<List<ProfessionalStandardData>> ParseAsync()
         {
             var result = new List<ProfessionalStandardData>();
 
             Console.WriteLine("Начинаем парсинг профессиональных стандартов...");
 
-            // Пока создаем тестовые данные
             result.AddRange(await ParseProfStandardMockDataAsync());
 
             Console.WriteLine($"Парсинг профстандартов завершен. Получено записей: {result.Count}");
             return result;
-        }        /// <summary>
-        /// Создание тестовых данных профстандартов
-        /// </summary>
+        }
+        
         private async Task<List<ProfessionalStandardData>> ParseProfStandardMockDataAsync()
         {
-            await Task.Delay(100); // Симуляция асинхронной работы
+            await Task.Delay(100);
             
             return new List<ProfessionalStandardData>
             {
@@ -134,12 +126,8 @@ namespace CompetencyParser.Parsers
                         "Основы информационной безопасности"
                     }
                 }
-            };
-        }
+            };        }
 
-        /// <summary>
-        /// Сохранение данных в файл
-        /// </summary>
         public async Task SaveToFileAsync(List<ProfessionalStandardData> data, string filePath)
         {
             try

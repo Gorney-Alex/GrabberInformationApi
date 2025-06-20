@@ -10,133 +10,105 @@ namespace CompetencyParser
         static async Task Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("=== СИСТЕМА АНАЛИЗА КОМПЕТЕНЦИЙ ИТ-СПЕЦИАЛИСТОВ ===");
-            Console.WriteLine();
-
-            try
+            Console.WriteLine("Программа анализа компетенций");
+            Console.WriteLine("Выполнил: Студент 3 курса");
+            Console.WriteLine();            try
             {
-                // Путь к файлу технического задания
-                var tzFilePath = @"c:\Users\Home\Desktop\UniversityPractice\GrabberInformationApi\TZ.txt";
-                
-                // Создание папки для результатов
-                var outputDir = @"c:\Users\Home\Desktop\UniversityPractice\GrabberInformationApi\Parsers\CompetencyParser\Results";
+  // Папка для сохранения результатов
+                string outputDir = @"c:\Users\Home\Desktop\UniversityPractice\GrabberInformationApi\Parsers\CompetencyParser\Results";
                 Directory.CreateDirectory(outputDir);
 
-                // 1. Чтение и анализ технического задания
-                Console.WriteLine("1. АНАЛИЗ ТЕХНИЧЕСКОГО ЗАДАНИЯ");
-                Console.WriteLine("-".PadRight(40, '-'));
+                // Шаг 1: Парсим данные ФГОС
+                Console.WriteLine("1. Парсим данные ФГОС...");
                 
-                var tzReader = new TzReader();
-                var tzContent = await tzReader.ReadTzFileAsync(tzFilePath);
-                var requirements = tzReader.ExtractRequirementsFromTz(tzContent);
-                
-                // Сохранение краткого анализа ТЗ
-                await tzReader.GenerateTzSummaryAsync(tzContent, Path.Combine(outputDir, "tz_analysis.txt"));
-                Console.WriteLine();
-
-                // 2. Парсинг данных ФГОС
-                Console.WriteLine("2. ПАРСИНГ ДАННЫХ ФГОС");
-                Console.WriteLine("-".PadRight(40, '-'));
-                
-                var fgosParser = new FgosParser();
-                var fgosData = await fgosParser.ParseAsync();
+                FgosParser fgosParser = new FgosParser();
+                List<FgosData> fgosData = await fgosParser.ParseAsync();
                 await fgosParser.SaveToFileAsync(fgosData, Path.Combine(outputDir, "fgos_data.json"));
-                Console.WriteLine();
-
-                // 3. Парсинг профессиональных стандартов
-                Console.WriteLine("3. ПАРСИНГ ПРОФЕССИОНАЛЬНЫХ СТАНДАРТОВ");
-                Console.WriteLine("-".PadRight(40, '-'));
+                Console.WriteLine("Готово!");                // Шаг 2: Парсим профессиональные стандарты
+                Console.WriteLine("2. Парсим профессиональные стандарты...");
                 
-                var profStandardParser = new ProfessionalStandardParser();
-                var profStandardData = await profStandardParser.ParseAsync();
+                ProfessionalStandardParser profStandardParser = new ProfessionalStandardParser();
+                List<ProfessionalStandardData> profStandardData = await profStandardParser.ParseAsync();
                 await profStandardParser.SaveToFileAsync(profStandardData, Path.Combine(outputDir, "prof_standards_data.json"));
-                Console.WriteLine();
+                Console.WriteLine("Готово!");
 
-                // 4. Парсинг вакансий
-                Console.WriteLine("4. ПАРСИНГ ВАКАНСИЙ");
-                Console.WriteLine("-".PadRight(40, '-'));
+                // Шаг 3: Парсим вакансии
+                Console.WriteLine("3. Парсим вакансии...");
                 
-                var vacancyParser = new VacancyParser();
-                var vacancyData = await vacancyParser.ParseAsync();
+                VacancyParser vacancyParser = new VacancyParser();
+                List<VacancyData> vacancyData = await vacancyParser.ParseAsync();
                 await vacancyParser.SaveToFileAsync(vacancyData, Path.Combine(outputDir, "vacancy_data.json"));
-                Console.WriteLine();
+                Console.WriteLine("Готово!");
 
-                // 5. Анализ и агрегация данных
-                Console.WriteLine("5. АНАЛИЗ И АГРЕГАЦИЯ КОМПЕТЕНЦИЙ");
-                Console.WriteLine("-".PadRight(40, '-'));
+                // Шаг 4: Анализируем компетенции
+                Console.WriteLine("4. Анализируем компетенции...");
                 
-                var analyzer = new CompetencyAnalyzer();
-                var competencies = await analyzer.AnalyzeCompetenciesAsync(fgosData, profStandardData, vacancyData);
-                  // Сохранение результатов
+                CompetencyAnalyzer analyzer = new CompetencyAnalyzer();
+                List<Competency> competencies = await analyzer.AnalyzeCompetenciesAsync(fgosData, profStandardData, vacancyData);
+                
+                // Сохраняем результаты
                 await analyzer.SaveAnalysisResultsToCsvAsync(competencies, Path.Combine(outputDir, "competencies_analysis.csv"));
                 await analyzer.GenerateAnalysisReportAsync(competencies, Path.Combine(outputDir, "analysis_report.txt"));
-                Console.WriteLine();
+                Console.WriteLine("Готово!");
 
-                // 6. СОЗДАНИЕ РАЗЛИЧНЫХ ПРЕДСТАВЛЕНИЙ РЕЗУЛЬТАТОВ
-                Console.WriteLine("6. СПОСОБЫ ПРЕДСТАВЛЕНИЯ РЕЗУЛЬТАТОВ");
-                Console.WriteLine("-".PadRight(40, '-'));
+                // Шаг 5: Создаем разные представления результатов
+                Console.WriteLine("5. Создаем представления результатов...");
                 
-                var visualizationService = new ResultsVisualizationService();
-                
-                // А) Табличное представление
-                Console.WriteLine("А) Создание табличного представления...");
+                SimpleVisualizationService visualizationService = new SimpleVisualizationService();
+                // Создаем таблицу
+                Console.WriteLine("- Создаем таблицу");
                 await visualizationService.CreateTableRepresentationAsync(competencies, 
                     Path.Combine(outputDir, "table_representation.txt"));
                 
-                // Б) Фильтрация по источникам
-                Console.WriteLine("Б) Настройка фильтрации по источникам...");
+                // Создаем фильтры по источникам
+                Console.WriteLine("- Создаем фильтры по источникам");
                 await visualizationService.CreateSourceFilteringAsync(competencies, outputDir);
                 
-                // В) HeatMap для визуализации частотности
-                Console.WriteLine("В) Создание HeatMap данных...");
+                // Создаем данные для тепловой карты
+                Console.WriteLine("- Создаем данные для тепловой карты");
                 await visualizationService.CreateHeatMapDataAsync(competencies, 
                     Path.Combine(outputDir, "heatmap_data.txt"));
                 
-                // Г) Данные для интерактивной визуализации
-                Console.WriteLine("Г) Подготовка данных для интерактивной визуализации...");
+                // Создаем данные для графиков
+                Console.WriteLine("- Создаем данные для графиков");
                 await visualizationService.CreateInteractiveVisualizationDataAsync(competencies, outputDir);
                 
-                // Д) Текстовый анализ диспропорций
-                Console.WriteLine("Д) Анализ диспропорций между источниками...");
+                // Анализируем различия между источниками
+                Console.WriteLine("- Анализируем различия между источниками");
                 await visualizationService.CreateDisproportionAnalysisAsync(competencies, 
                     Path.Combine(outputDir, "disproportion_analysis.txt"));
-                  // Е) Матрица сравнения
-                Console.WriteLine("Е) Создание матрицы сравнения...");
+                
+                // Создаем матрицу сравнения
+                Console.WriteLine("- Создаем матрицу сравнения");
                 await visualizationService.CreateComparisonMatrixAsync(competencies, 
                     Path.Combine(outputDir, "comparison_matrix.txt"));
-                
-                // Ж) Интерактивный HTML-отчет
-                Console.WriteLine("Ж) Создание интерактивного HTML-отчета...");
-                var htmlReportService = new HtmlReportService();
+                  // Создаем HTML отчет
+                Console.WriteLine("- Создаем HTML отчет");
+                SimpleHtmlReportService htmlReportService = new SimpleHtmlReportService();
                 await htmlReportService.CreateInteractiveHtmlReportAsync(competencies,
                     Path.Combine(outputDir, "interactive_report.html"));
                 
-                Console.WriteLine();
+                Console.WriteLine("Готово!");
 
-                // 7. ИТОГОВАЯ СТАТИСТИКА
-                Console.WriteLine("7. ИТОГОВАЯ СТАТИСТИКА");
-                Console.WriteLine("-".PadRight(40, '-'));
-                
-                DisplayStatistics(fgosData, profStandardData, vacancyData, competencies);
-                
+                // Показываем статистику
                 Console.WriteLine();
-                Console.WriteLine($"Все результаты сохранены в папке: {outputDir}");
-                Console.WriteLine("Парсинг и анализ завершен успешно!");
+                Console.WriteLine("ИТОГОВАЯ СТАТИСТИКА:");
+                ShowStatistics(fgosData, profStandardData, vacancyData, competencies);                
+                Console.WriteLine();
+                Console.WriteLine($"Все файлы сохранены в папке: {outputDir}");
+                Console.WriteLine("Анализ завершен!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Критическая ошибка: {ex.Message}");
-                Console.WriteLine($"Стек вызовов: {ex.StackTrace}");
+                Console.WriteLine($"Ошибка: {ex.Message}");
             }
 
             Console.WriteLine("\nНажмите любую клавишу для выхода...");
             Console.ReadKey();
         }
 
-        /// <summary>
-        /// Отображение итоговой статистики
-        /// </summary>
-        private static void DisplayStatistics(
+        // Простая функция для показа статистики
+        private static void ShowStatistics(
             List<FgosData> fgosData,
             List<ProfessionalStandardData> profStandardData,
             List<VacancyData> vacancyData,
@@ -145,43 +117,23 @@ namespace CompetencyParser
             Console.WriteLine($"Данные ФГОС: {fgosData.Count} записей");
             Console.WriteLine($"Профессиональные стандарты: {profStandardData.Count} записей");
             Console.WriteLine($"Вакансии: {vacancyData.Count} записей");
-            Console.WriteLine($"Уникальных компетенций: {competencies.Count}");
+            Console.WriteLine($"Найдено компетенций: {competencies.Count}");
             Console.WriteLine();
 
-            // Топ-5 самых упоминаемых компетенций
+            // Показываем топ-5 компетенций
             var top5 = competencies.OrderByDescending(c => c.MentionCount).Take(5);
-            Console.WriteLine("ТОП-5 самых упоминаемых компетенций:");
-            int rank = 1;
+            Console.WriteLine("ТОП-5 компетенций:");
+            int num = 1;
             foreach (var comp in top5)
             {
-                Console.WriteLine($"{rank}. {comp.Name} - {comp.MentionCount} упоминаний ({GetSourceName(comp.Source)})");
-                rank++;
+                string sourceName = comp.Source.ToString();
+                if (comp.Source == CompetencySource.FGOS) sourceName = "ФГОС";
+                if (comp.Source == CompetencySource.ProfessionalStandard) sourceName = "Профстандарт";
+                if (comp.Source == CompetencySource.Vacancy) sourceName = "Вакансия";
+                
+                Console.WriteLine($"{num}. {comp.Name} - {comp.MentionCount} раз ({sourceName})");
+                num++;
             }
-            Console.WriteLine();
-
-            // Статистика по источникам
-            var sourceStats = competencies.GroupBy(c => c.Source)
-                .Select(g => new { Source = g.Key, Count = g.Count() });
-
-            Console.WriteLine("Распределение по источникам:");
-            foreach (var stat in sourceStats)
-            {
-                Console.WriteLine($"- {GetSourceName(stat.Source)}: {stat.Count} компетенций");
-            }
-        }
-
-        /// <summary>
-        /// Получение читаемого названия источника
-        /// </summary>
-        private static string GetSourceName(CompetencySource source)
-        {
-            return source switch
-            {
-                CompetencySource.FGOS => "ФГОС",
-                CompetencySource.ProfessionalStandard => "Профстандарт", 
-                CompetencySource.Vacancy => "Вакансия",
-                _ => "Неизвестно"
-            };
         }
     }
 }

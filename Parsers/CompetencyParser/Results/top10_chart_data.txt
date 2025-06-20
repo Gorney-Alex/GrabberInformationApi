@@ -1,13 +1,13 @@
 ﻿ДАННЫЕ ДЛЯ ТОП-10 ДИАГРАММЫ
-==============================
+============================
 
-SQL,45
-Git,27
-PostgreSQL,21
-REST API,21
-Linux,16
-Python,14
-Docker,14
-JavaScript,13
-React,11
-CSS,11
+SQL: 53
+Git: 27
+PostgreSQL: 21
+REST API: 19
+Docker: 18
+JavaScript: 16
+Python: 16
+Linux: 15
+PHP: 13
+HTML: 13

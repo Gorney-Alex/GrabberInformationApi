@@ -6,13 +6,8 @@ using System.Text;
 
 namespace CompetencyParser.Services
 {
-    /// <summary>
-    /// Сервис для анализа и агрегации компетенций
-    /// </summary>
     public class CompetencyAnalyzer
-    {        /// <summary>
-        /// Анализ и агрегация данных из всех источников
-        /// </summary>
+    {
         public async Task<List<Competency>> AnalyzeCompetenciesAsync(
             List<FgosData> fgosData,
             List<ProfessionalStandardData> profStandardData,
@@ -22,39 +17,29 @@ namespace CompetencyParser.Services
 
             Console.WriteLine("Начинаем анализ компетенций...");
 
-            await Task.Delay(50); // Симуляция асинхронной работы
+            await Task.Delay(50);
 
-            // Анализ данных ФГОС
-            competencies.AddRange(AnalyzeFgosData(fgosData));
+            competencies.AddRange(ProcessFgosData(fgosData));
+            competencies.AddRange(ProcessProfStandards(profStandardData));
+            competencies.AddRange(ProcessVacancies(vacancyData));
 
-            // Анализ профессиональных стандартов
-            competencies.AddRange(AnalyzeProfessionalStandards(profStandardData));
+            var finalCompetencies = CountCompetencies(competencies);
 
-            // Анализ вакансий
-            competencies.AddRange(AnalyzeVacancies(vacancyData));
+            Console.WriteLine($"Анализ завершен. Получено уникальных компетенций: {finalCompetencies.Count}");
 
-            // Агрегация и подсчет частотности
-            var aggregatedCompetencies = AggregateCompetencies(competencies);
-
-            Console.WriteLine($"Анализ завершен. Получено уникальных компетенций: {aggregatedCompetencies.Count}");
-
-            return aggregatedCompetencies;
+            return finalCompetencies;
         }
 
-        /// <summary>
-        /// Анализ данных ФГОС
-        /// </summary>
-        private List<Competency> AnalyzeFgosData(List<FgosData> fgosData)
+        private List<Competency> ProcessFgosData(List<FgosData> fgosData)
         {
             var competencies = new List<Competency>();
-            var id = 1;
+            int id = 1;
 
             foreach (var fgos in fgosData)
             {
-                // Извлекаем ключевые слова из описания компетенций
-                var keywords = ExtractKeywordsFromText(fgos.CompetencyDescription);
+                string[] keywords = GetKeywords(fgos.CompetencyDescription);
 
-                foreach (var keyword in keywords)
+                foreach (string keyword in keywords)
                 {
                     competencies.Add(new Competency
                     {
@@ -62,7 +47,7 @@ namespace CompetencyParser.Services
                         Name = keyword,
                         Description = fgos.CompetencyDescription,
                         Source = CompetencySource.FGOS,
-                        Category = GetCompetencyCategory(keyword),
+                        Category = GetCategory(keyword),
                         MentionCount = 1
                     });
                 }
@@ -71,21 +56,18 @@ namespace CompetencyParser.Services
             return competencies;
         }
 
-        /// <summary>
-        /// Анализ профессиональных стандартов
-        /// </summary>
-        private List<Competency> AnalyzeProfessionalStandards(List<ProfessionalStandardData> profStandardData)
+        private List<Competency> ProcessProfStandards(List<ProfessionalStandardData> profStandardData)
         {
             var competencies = new List<Competency>();
-            var id = 1000;
+            int id = 1000;
 
             foreach (var profStandard in profStandardData)
             {
-                // Анализируем навыки
-                foreach (var skill in profStandard.RequiredSkills)
+                // Обрабатываем навыки
+                foreach (string skill in profStandard.RequiredSkills)
                 {
-                    var keywords = ExtractKeywordsFromText(skill);
-                    foreach (var keyword in keywords)
+                    string[] keywords = GetKeywords(skill);
+                    foreach (string keyword in keywords)
                     {
                         competencies.Add(new Competency
                         {
@@ -93,17 +75,16 @@ namespace CompetencyParser.Services
                             Name = keyword,
                             Description = skill,
                             Source = CompetencySource.ProfessionalStandard,
-                            Category = GetCompetencyCategory(keyword),
+                            Category = GetCategory(keyword),
                             MentionCount = 1
                         });
                     }
                 }
 
-                // Анализируем знания
-                foreach (var knowledge in profStandard.RequiredKnowledge)
+                foreach (string knowledge in profStandard.RequiredKnowledge)
                 {
-                    var keywords = ExtractKeywordsFromText(knowledge);
-                    foreach (var keyword in keywords)
+                    string[] keywords = GetKeywords(knowledge);
+                    foreach (string keyword in keywords)
                     {
                         competencies.Add(new Competency
                         {
@@ -111,7 +92,7 @@ namespace CompetencyParser.Services
                             Name = keyword,
                             Description = knowledge,
                             Source = CompetencySource.ProfessionalStandard,
-                            Category = GetCompetencyCategory(keyword),
+                            Category = GetCategory(keyword),
                             MentionCount = 1
                         });
                     }
@@ -121,17 +102,14 @@ namespace CompetencyParser.Services
             return competencies;
         }
 
-        /// <summary>
-        /// Анализ вакансий
-        /// </summary>
-        private List<Competency> AnalyzeVacancies(List<VacancyData> vacancyData)
+        private List<Competency> ProcessVacancies(List<VacancyData> vacancyData)
         {
             var competencies = new List<Competency>();
-            var id = 2000;
+            int id = 2000;
 
             foreach (var vacancy in vacancyData)
             {
-                foreach (var skill in vacancy.ExtractedSkills)
+                foreach (string skill in vacancy.ExtractedSkills)
                 {
                     competencies.Add(new Competency
                     {
@@ -139,7 +117,7 @@ namespace CompetencyParser.Services
                         Name = skill,
                         Description = $"Навык из вакансии: {vacancy.Title}",
                         Source = CompetencySource.Vacancy,
-                        Category = GetCompetencyCategory(skill),
+                        Category = GetCategory(skill),
                         MentionCount = 1
                     });
                 }
@@ -147,49 +125,63 @@ namespace CompetencyParser.Services
 
             return competencies;
         }
-
-        /// <summary>
-        /// Агрегация компетенций и подсчет частотности
-        /// </summary>
-        private List<Competency> AggregateCompetencies(List<Competency> competencies)
-        {            var grouped = competencies
-                .GroupBy(c => new { Name = c.Name.ToLower(), c.Source })
-                .Select(g => new Competency
-                {
-                    Id = g.First().Id,
-                    Name = g.First().Name,
-                    Description = g.First().Description,
-                    Source = g.Key.Source,
-                    Category = g.First().Category,
-                    MentionCount = g.Sum(x => x.MentionCount),
-                    FrequencyPercent = 0 // Будет рассчитано позже
-                })
-                .ToList();
-
-            // Рассчет частотности по источникам
-            var totalBySource = grouped.GroupBy(c => c.Source)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.MentionCount));
-
-            foreach (var competency in grouped)
+        private List<Competency> CountCompetencies(List<Competency> competencies)
+        {
+            var grouped = new List<Competency>();
+            var competencyGroups = new Dictionary<string, List<Competency>>();
+            
+            foreach (var comp in competencies)
             {
-                if (totalBySource.ContainsKey(competency.Source) && totalBySource[competency.Source] > 0)
+                string key = comp.Name.ToLower() + "_" + comp.Source.ToString();
+                if (!competencyGroups.ContainsKey(key))
                 {
-                    competency.FrequencyPercent = Math.Round(
-                        (double)competency.MentionCount / totalBySource[competency.Source] * 100, 2);
+                    competencyGroups[key] = new List<Competency>();
+                }
+                competencyGroups[key].Add(comp);
+            }
+            
+            foreach (var group in competencyGroups)
+            {
+                var firstComp = group.Value.First();
+
+                var newComp = new Competency
+                {
+                    Id = firstComp.Id,
+                    Name = firstComp.Name,
+                    Description = firstComp.Description,
+                    Source = firstComp.Source,
+                    Category = firstComp.Category,
+                    MentionCount = group.Value.Count,
+                    FrequencyPercent = 0
+                };
+
+                grouped.Add(newComp);
+                
+            }
+            
+            var sourceStats = new Dictionary<CompetencySource, int>();
+            foreach (var comp in grouped)
+            {
+                if (!sourceStats.ContainsKey(comp.Source))
+                    sourceStats[comp.Source] = 0;
+                sourceStats[comp.Source] += comp.MentionCount;
+            }
+            
+            foreach (var comp in grouped)
+            {
+                if (sourceStats[comp.Source] > 0)
+                {
+                    comp.FrequencyPercent = Math.Round(
+                        (double)comp.MentionCount / sourceStats[comp.Source] * 100, 2);
                 }
             }
 
             return grouped.OrderByDescending(c => c.MentionCount).ToList();
         }
 
-        /// <summary>
-        /// Извлечение ключевых слов из текста
-        /// </summary>
-        private List<string> ExtractKeywordsFromText(string text)
+        private string[] GetKeywords(string text)
         {
-            var keywords = new List<string>();
-            var itTerms = new[]
-            {
+            string[] itTerms = {
                 "программирование", "разработка", "тестирование", "анализ", "проектирование",
                 "базы данных", "SQL", "алгоритм", "архитектура", "безопасность",
                 "сеть", "система", "веб", "мобильная разработка", "DevOps",
@@ -197,138 +189,104 @@ namespace CompetencyParser.Services
                 "облачные технологии", "микросервисы", "API", "фреймворк"
             };
 
-            foreach (var term in itTerms)
+            var foundKeywords = new List<string>();
+            string lowerText = text.ToLower();
+            
+            foreach (string term in itTerms)
             {
-                if (text.ToLower().Contains(term.ToLower()))
+                if (lowerText.Contains(term.ToLower()))
                 {
-                    keywords.Add(term);
+                    foundKeywords.Add(term);
                 }
             }
 
-            return keywords.Distinct().ToList();
+            return foundKeywords.ToArray();
         }
 
-        /// <summary>
-        /// Определение категории компетенции
-        /// </summary>
-        private string GetCompetencyCategory(string competencyName)
+        private string GetCategory(string competencyName)
         {
-            var technical = new[] { "SQL", "программирование", "базы данных", "алгоритм", "архитектура", "API", "фреймворк" };
-            var analytical = new[] { "анализ", "проектирование", "тестирование" };
-            var management = new[] { "управление", "планирование", "координация" };
-
-            if (technical.Any(t => competencyName.ToLower().Contains(t.ToLower())))
+            string name = competencyName.ToLower();
+            
+            if (name.Contains("sql") || name.Contains("программирование") || 
+                name.Contains("базы данных") || name.Contains("алгоритм") || 
+                name.Contains("архитектура") || name.Contains("api"))
                 return "Техническая";
-            if (analytical.Any(a => competencyName.ToLower().Contains(a.ToLower())))
+            
+            if (name.Contains("анализ") || name.Contains("проектирование") || 
+                name.Contains("тестирование"))
                 return "Аналитическая";
-            if (management.Any(m => competencyName.ToLower().Contains(m.ToLower())))
-                return "Управленческая";
-
+            
             return "Общая";
         }
 
-        /// <summary>
-        /// Сохранение результатов анализа в CSV
-        /// </summary>
         public async Task SaveAnalysisResultsToCsvAsync(List<Competency> competencies, string filePath)
         {
             try
             {
-                await using var writer = new StringWriter();
-                await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-                csv.WriteField("Компетенция");
-                csv.WriteField("Источник");
-                csv.WriteField("Описание");
-                csv.WriteField("Частота в источнике (%)");
-                csv.WriteField("Количество упоминаний");
-                csv.WriteField("Категория");
-                csv.NextRecord();
-
-                foreach (var competency in competencies)
+                var lines = new List<string>();
+                
+                lines.Add("Компетенция,Источник,Описание,Частота в источнике (%),Количество упоминаний,Категория");
+                
+                foreach (var comp in competencies)
                 {
-                    csv.WriteField(competency.Name);
-                    csv.WriteField(GetSourceName(competency.Source));
-                    csv.WriteField(competency.Description);
-                    csv.WriteField(competency.FrequencyPercent);
-                    csv.WriteField(competency.MentionCount);
-                    csv.WriteField(competency.Category);
-                    csv.NextRecord();
+                    string sourceName = comp.Source.ToString();
+                    if (comp.Source == CompetencySource.FGOS) sourceName = "ФГОС";
+                    if (comp.Source == CompetencySource.ProfessionalStandard) sourceName = "Профстандарт";
+                    if (comp.Source == CompetencySource.Vacancy) sourceName = "Вакансия";
+                    
+                    string line = $"{comp.Name},{sourceName},{comp.Description},{comp.FrequencyPercent},{comp.MentionCount},{comp.Category}";
+                    lines.Add(line);
                 }
-
-                await File.WriteAllTextAsync(filePath, writer.ToString(), Encoding.UTF8);
+                
+                await File.WriteAllLinesAsync(filePath, lines, Encoding.UTF8);
                 Console.WriteLine($"Результаты анализа сохранены в CSV: {filePath}");
             }
             catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при сохранении в CSV: {ex.Message}");
-                throw;
+            {                Console.WriteLine($"Ошибка при сохранении в CSV: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Получение читаемого названия источника
-        /// </summary>
-        private string GetSourceName(CompetencySource source)
-        {
-            return source switch
-            {
-                CompetencySource.FGOS => "ФГОС",
-                CompetencySource.ProfessionalStandard => "Профстандарт",
-                CompetencySource.Vacancy => "Вакансия",
-                _ => "Неизвестно"
-            };
-        }
-
-        /// <summary>
-        /// Создание отчета по анализу
-        /// </summary>
         public async Task GenerateAnalysisReportAsync(List<Competency> competencies, string reportPath)
         {
-            var report = new StringBuilder();
+            var lines = new List<string>();
             
-            report.AppendLine("ОТЧЕТ ПО АНАЛИЗУ КОМПЕТЕНЦИЙ ИТ-СПЕЦИАЛИСТОВ");
-            report.AppendLine("=".PadRight(50, '='));
-            report.AppendLine($"Дата создания: {DateTime.Now:dd.MM.yyyy HH:mm}");
-            report.AppendLine($"Общее количество компетенций: {competencies.Count}");
-            report.AppendLine();
+            lines.Add("ОТЧЕТ ПО АНАЛИЗУ КОМПЕТЕНЦИЙ ИТ-СПЕЦИАЛИСТОВ");
+            lines.Add("==================================================");
+            lines.Add($"Дата создания: {DateTime.Now:dd.MM.yyyy HH:mm}");
+            lines.Add($"Общее количество компетенций: {competencies.Count}");
+            lines.Add("");
 
-            // Статистика по источникам
-            var sourceStats = competencies.GroupBy(c => c.Source)
-                .Select(g => new { Source = g.Key, Count = g.Count() });
+            var vacancyCount = competencies.Where(c => c.Source == CompetencySource.Vacancy).Count();
+            var profCount = competencies.Where(c => c.Source == CompetencySource.ProfessionalStandard).Count();
+            var fgosCount = competencies.Where(c => c.Source == CompetencySource.FGOS).Count();
 
-            report.AppendLine("СТАТИСТИКА ПО ИСТОЧНИКАМ:");
-            report.AppendLine("-".PadRight(30, '-'));
-            foreach (var stat in sourceStats)
+            lines.Add("СТАТИСТИКА ПО ИСТОЧНИКАМ:");
+            lines.Add("------------------------------");
+            lines.Add($"Вакансия: {vacancyCount} компетенций");
+            lines.Add($"Профстандарт: {profCount} компетенций");
+            lines.Add($"ФГОС: {fgosCount} компетенций");
+            lines.Add("");
+
+            var top10 = competencies.OrderByDescending(c => c.MentionCount).Take(10).ToList();
+            lines.Add("ТОП-10 САМЫХ УПОМИНАЕМЫХ КОМПЕТЕНЦИЙ:");
+            lines.Add("----------------------------------------");
+            for (int i = 0; i < top10.Count; i++)
             {
-                report.AppendLine($"{GetSourceName(stat.Source)}: {stat.Count} компетенций");
+                var comp = top10[i];
+                lines.Add($"{i + 1}. {comp.Name} - {comp.MentionCount} упоминаний ({comp.FrequencyPercent:F2}%)");
             }
-            report.AppendLine();
+            lines.Add("");
 
-            // Топ-10 самых упоминаемых компетенций
-            var topCompetencies = competencies.OrderByDescending(c => c.MentionCount).Take(10);
-            report.AppendLine("ТОП-10 САМЫХ УПОМИНАЕМЫХ КОМПЕТЕНЦИЙ:");
-            report.AppendLine("-".PadRight(40, '-'));
-            int rank = 1;
-            foreach (var comp in topCompetencies)
-            {
-                report.AppendLine($"{rank}. {comp.Name} - {comp.MentionCount} упоминаний ({comp.FrequencyPercent}%)");
-                rank++;
-            }
-            report.AppendLine();
+            var techCount = competencies.Where(c => c.Category == "Техническая").Count();
+            var analCount = competencies.Where(c => c.Category == "Аналитическая").Count();
+            var genCount = competencies.Where(c => c.Category == "Общая").Count();
 
-            // Статистика по категориям
-            var categoryStats = competencies.GroupBy(c => c.Category)
-                .Select(g => new { Category = g.Key, Count = g.Count() });
-
-            report.AppendLine("СТАТИСТИКА ПО КАТЕГОРИЯМ:");
-            report.AppendLine("-".PadRight(30, '-'));
-            foreach (var stat in categoryStats)
-            {
-                report.AppendLine($"{stat.Category}: {stat.Count} компетенций");
-            }
-
-            await File.WriteAllTextAsync(reportPath, report.ToString(), Encoding.UTF8);
+            lines.Add("СТАТИСТИКА ПО КАТЕГОРИЯМ:");
+            lines.Add("------------------------------");
+            lines.Add($"Техническая: {techCount} компетенций");
+            lines.Add($"Общая: {genCount} компетенций");
+            lines.Add($"Аналитическая: {analCount} компетенций");
+            await File.WriteAllLinesAsync(reportPath, lines, Encoding.UTF8);
             Console.WriteLine($"Отчет сохранен: {reportPath}");
         }
     }

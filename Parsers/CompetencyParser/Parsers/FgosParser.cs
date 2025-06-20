@@ -5,17 +5,14 @@ using System.Text;
 
 namespace CompetencyParser.Parsers
 {
-    /// <summary>
-    /// Парсер для данных ФГОС ВО
-    /// </summary>
     public class FgosParser : IParser<FgosData>
     {
         private readonly HttpClient _httpClient;
         private readonly List<string> _targetDirections = new()
         {
-            "02.04.03", // Математическое обеспечение и администрирование информационных систем
-            "09.04.01", // Информатика и вычислительная техника
-            "09.04.04"  // Программная инженерия
+            "02.04.03",
+            "09.04.01",
+            "09.04.04"
         };
 
         public FgosParser()
@@ -24,29 +21,21 @@ namespace CompetencyParser.Parsers
             _httpClient.DefaultRequestHeaders.Add("User-Agent", 
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
         }
-
-        /// <summary>
-        /// Парсинг данных ФГОС
-        /// </summary>
         public async Task<List<FgosData>> ParseAsync()
         {
             var result = new List<FgosData>();
 
             Console.WriteLine("Начинаем парсинг данных ФГОС ВО...");
 
-            // Пока создаем тестовые данные, так как для реального парсинга нужны конкретные URL
             result.AddRange(await ParseFgosMockDataAsync());
 
             Console.WriteLine($"Парсинг ФГОС завершен. Получено записей: {result.Count}");
             return result;
         }
 
-        /// <summary>
-        /// Создание тестовых данных ФГОС (заменить на реальный парсинг)
-        /// </summary>
         private async Task<List<FgosData>> ParseFgosMockDataAsync()
         {
-            await Task.Delay(100); // Симуляция асинхронной работы
+            await Task.Delay(100);
             
             return new List<FgosData>
             {
@@ -92,12 +81,8 @@ namespace CompetencyParser.Parsers
                         "Владеет навыками разработки и анализа математических моделей"
                     }
                 }
-            };
-        }
+            };        }
 
-        /// <summary>
-        /// Сохранение данных в файл
-        /// </summary>
         public async Task SaveToFileAsync(List<FgosData> data, string filePath)
         {
             try

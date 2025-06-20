@@ -6,15 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace CompetencyParser.Parsers
 {
-    /// <summary>
-    /// Парсер для вакансий с HeadHunter
-    /// </summary>
     public class VacancyParser : IParser<VacancyData>
     {
         private readonly HttpClient _httpClient;
         private const string HH_API_BASE_URL = "https://api.hh.ru/vacancies";
         
-        // Список ключевых ИТ-навыков для поиска
         private readonly List<string> _itSkills = new()
         {
             "C#", "Java", "Python", "JavaScript", "TypeScript", "PHP", "Go", "Rust",
@@ -35,12 +31,8 @@ namespace CompetencyParser.Parsers
         {
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Add("User-Agent", 
-                "CompetencyParser/1.0 (educational_practice@university.edu)");
-        }
+                "CompetencyParser/1.0 (educational_practice@university.edu)");        }
 
-        /// <summary>
-        /// Парсинг вакансий с HeadHunter
-        /// </summary>
         public async Task<List<VacancyData>> ParseAsync()
         {
             var result = new List<VacancyData>();
@@ -49,7 +41,6 @@ namespace CompetencyParser.Parsers
 
             try
             {
-                // Поисковые запросы для ИТ-вакансий
                 var searchQueries = new[] { "программист", "разработчик", "системный аналитик", "архитектор ПО" };
 
                 foreach (var query in searchQueries)
@@ -57,8 +48,7 @@ namespace CompetencyParser.Parsers
                     Console.WriteLine($"Поиск вакансий по запросу: {query}");
                     var vacancies = await SearchVacanciesAsync(query);
                     result.AddRange(vacancies);
-                    
-                    // Небольшая пауза между запросами
+
                     await Task.Delay(1000);
                 }
 
@@ -67,16 +57,12 @@ namespace CompetencyParser.Parsers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при парсинге вакансий: {ex.Message}");
-                // В случае ошибки возвращаем тестовые данные
                 result.AddRange(await ParseVacancyMockDataAsync());
             }
 
             return result;
         }
 
-        /// <summary>
-        /// Поиск вакансий по запросу
-        /// </summary>
         private async Task<List<VacancyData>> SearchVacanciesAsync(string query, int pages = 2)
         {
             var result = new List<VacancyData>();
@@ -101,7 +87,6 @@ namespace CompetencyParser.Parsers
                         }
                     }
 
-                    // Пауза между страницами
                     await Task.Delay(500);
                 }
                 catch (Exception ex)
@@ -112,10 +97,7 @@ namespace CompetencyParser.Parsers
 
             return result;
         }
-
-        /// <summary>
-        /// Парсинг вакансии из JSON
-        /// </summary>
+        
         private async Task<VacancyData?> ParseVacancyFromJsonAsync(JToken vacancyJson)
         {
             try
@@ -129,13 +111,11 @@ namespace CompetencyParser.Parsers
                     Source = VacancySource.HeadHunter
                 };
 
-                // Парсинг даты
                 if (DateTime.TryParse(vacancyJson["published_at"]?.ToString(), out var publishedDate))
                 {
                     vacancy.PublishedDate = publishedDate;
                 }
 
-                // Парсинг зарплаты
                 var salary = vacancyJson["salary"];
                 if (salary != null && !salary.HasValues == false)
                 {
@@ -148,10 +128,8 @@ namespace CompetencyParser.Parsers
                     };
                 }
 
-                // Парсинг города
                 vacancy.City = vacancyJson["area"]?["name"]?.ToString() ?? "";
 
-                // Получение подробной информации о вакансии для извлечения навыков
                 if (!string.IsNullOrEmpty(vacancy.VacancyId))
                 {
                     await LoadVacancyDetailsAsync(vacancy);
@@ -166,9 +144,6 @@ namespace CompetencyParser.Parsers
             }
         }
 
-        /// <summary>
-        /// Загрузка подробной информации о вакансии
-        /// </summary>
         private async Task LoadVacancyDetailsAsync(VacancyData vacancy)
         {
             try
@@ -178,12 +153,11 @@ namespace CompetencyParser.Parsers
                 var data = JObject.Parse(response);
 
                 vacancy.Description = data["description"]?.ToString() ?? "";
-                
-                // Извлечение навыков из описания и требований
+
                 var fullText = $"{vacancy.Title} {vacancy.Description}";
                 vacancy.ExtractedSkills = ExtractSkillsFromText(fullText);
 
-                await Task.Delay(200); // Пауза между запросами деталей
+                await Task.Delay(200);
             }
             catch (Exception ex)
             {
@@ -191,9 +165,6 @@ namespace CompetencyParser.Parsers
             }
         }
 
-        /// <summary>
-        /// Извлечение навыков из текста
-        /// </summary>
         private List<string> ExtractSkillsFromText(string text)
         {
             var foundSkills = new List<string>();
@@ -209,13 +180,12 @@ namespace CompetencyParser.Parsers
             }
 
             return foundSkills.Distinct().ToList();
-        }        /// <summary>
-        /// Создание тестовых данных вакансий (на случай недоступности API)
-        /// </summary>
+        }
+
         private async Task<List<VacancyData>> ParseVacancyMockDataAsync()
         {
-            await Task.Delay(100); // Симуляция асинхронной работы
-            
+            await Task.Delay(100);
+
             return new List<VacancyData>
             {
                 new VacancyData
@@ -257,16 +227,13 @@ namespace CompetencyParser.Parsers
                     PublishedDate = DateTime.Now.AddDays(-2),
                     Salary = new SalaryInfo { From = 180000, To = 280000, Currency = "RUR" }
                 }
-            };
+            };       
         }
 
-        /// <summary>
-        /// Сохранение данных в файл
-        /// </summary>
         public async Task SaveToFileAsync(List<VacancyData> data, string filePath)
         {
             try
-            {                var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+            {   var json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
                 await File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
                 Console.WriteLine($"Данные вакансий сохранены в файл: {filePath}");
