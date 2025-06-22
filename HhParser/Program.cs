@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 class Program
 {
@@ -14,7 +15,10 @@ class Program
         if (!client.DefaultRequestHeaders.Contains("User-Agent"))
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
-        string[] searchQueries = {"Программист", "Разработчик игр"};
+        string[] searchQueries = {"Программист", "Backend-разработчик",
+            "Frontend-разработчик", "SQL разработчик", "Python разработчик",
+            "JavaScript разработчик" };
+            
         int pagesToFetch = 3;
 
         Dictionary<string, int> skillFrequency = new Dictionary<string, int>();
@@ -79,13 +83,26 @@ class Program
                 });
             }
 
-            Console.WriteLine("\nТаблица компетенций:");
-            Console.WriteLine("{0,-25} | {1,-15} | {2,-30} | {3,10}", "Компетенция", "Источник", "Описание", "Частота (%)");
-            Console.WriteLine(new string('-', 90));
+            Console.WriteLine("\n+------------------------+---------------------+-------------------------------+-------------------------+");
+            Console.WriteLine("| {0,-22} | {1,-19} | {2,-29} | {3,-23} |", "Компетенция", "Источник", "Описание", "Частота в вакансиях (%)");
+            Console.WriteLine("+------------------------+---------------------+-------------------------------+-------------------------+");
             foreach (var comp in competencies)
             {
-                Console.WriteLine("{0,-25} | {1,-15} | {2,-30} | {3,10:F2}", comp.Name, comp.Source, comp.Description, comp.FrequencyPercent);
+                Console.WriteLine("| {0,-22} | {1,-19} | {2,-29} | {3,21:F0}% |", comp.Name, comp.Source, comp.Description, comp.FrequencyPercent);
             }
+            Console.WriteLine("+------------------------+---------------------+-------------------------------+-------------------------+");
+
+            string csvPath = "competencies.csv";
+            using (var writer = new System.IO.StreamWriter(csvPath, false, System.Text.Encoding.UTF8))
+            {
+                writer.WriteLine("Навык,Количество_упоминаний,Частота_%,Источник");
+                foreach (var skill in skillFrequency.OrderByDescending(kv => kv.Value).Take(20))
+                {
+                    double freqPercent = totalVacancies > 0 ? (skill.Value * 100.0 / totalVacancies) : 0;
+                    writer.WriteLine($"{skill.Key},{skill.Value},{freqPercent.ToString("F2", CultureInfo.InvariantCulture)},Вакансии");
+                }
+            }
+            Console.WriteLine($"\nДанные сохранены в файл: {csvPath}");
         }
         catch (HttpRequestException ex)
         {
